@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load avatar_tags %}
+
+{% block content %}
+
+<table class="table">
+	{% for a, s in list %}
+	<tr>
+		<td>{% avatar a.admissionprocess.voting_target.user 84 %}</td>
+		<td>{{ a.admissionprocess.voting_target.user.first_name }}</td>
+		<td>{{ a.admissionprocess.voting_target.user.last_name }}</td>
+		<td>{{ a.admissionprocess.voting_target.user.username }}</td>
+		<td>
+			{% if s == 'True' %}
+			<span class="label label-success">Voted:<br>accepted</span>
+			{% elif s == 'False' %}
+			<span class="label label-important">Voted:<br>declined</span>
+			{% elif s == 'None' %}
+			<span class="label label-info">Voted:<br>abstained</span>
+			{% else %}
+			<span class="label">None</span>
+			{% endif %}
+
+
+
+
+		</td>
+		<td>
+				<form method="POST">
+		{% csrf_token %}
+		<input type="hidden" name="adm_id" value="{{ a.admissionprocess.id }}">
+			<label></label>
+			{% for c in a.choice_set.all %}
+				<input type="radio" name="choice" value="{{ c.id }}">{{ c.choice }}<br>
+			{% endfor %}
+			<input type="submit" value="Submit" class="btn btn-primary">
+			</form>
+		</td>
+
+		
+	<tr>
+	{% endfor %}
+	
+</table>
+{% endblock %}

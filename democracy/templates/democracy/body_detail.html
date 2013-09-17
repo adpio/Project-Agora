@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+
+{% block extra_head %}
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+	<script type='text/javascript'>
+	  google.load('visualization', '1', {packages:['gauge']});
+	  google.setOnLoadCallback(drawChart);
+	  function drawChart() {
+		var data = google.visualization.arrayToDataTable([
+		  ['Label', 'Value'],
+		  ['%', 90],
+
+		]);
+
+		var options = {
+		  width: 100, height: 100,
+		  redFrom: 0, redTo: 75,
+		  yellowFrom:75, yellowTo: 90,
+		  greenFrom: 90, greenTo: 100,
+		  minorTicks: 5, animation:{duration: 1000,easing: 'out',},
+		};
+
+		var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+		chart.draw(data, options);
+	  }
+	</script>
+
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="span8">
+		<div class="row">
+			<div class="span5">
+
+
+<h1> {{body.name}} </h1>
+{% if body.is_admissions %}
+<div class="alert alert-info">
+This is a <strong>admission body</strong>. Click here to admit members:
+<a href="{% url 'admission_detail' body.org.id body.id %}" class="btn btn-primary">Go to admissions</a>
+</div>
+{% endif %}
+
+</div>
+<div class="span3">
+	<img src="{{ body.logo.url }}" class="img-polaroid">
+</div>
+</div>
+<h2>todos:</h2>
+<table class="table table-hover table-condesed">
+	{% for todo  in body.my_todos.all %}
+	<tr>
+
+		<td>
+			<a href="{% url 'todo_detail' body.org.id body.id todo.id %}">
+				{{ todo.title }}
+			</a> 
+		</td>
+		<td>
+			<span class="label 
+			{% if todo.priority == 1 %}
+			label-info
+			{% elif todo.priority == 2 %}
+			label-warning	
+			{% elif todo.priority == 3 %}
+			label-important
+			{% endif %}
+			">
+			{{ todo.get_priority_display }}
+		</span>
+	</td>
+	<td>
+		{{ todo.date_due }}
+	</td>
+</tr>
+{%endfor%}
+</table>
+<a href="{% url 'form_todo' body.org.id body.id %}" class="btn btn-primary">Create ToDo</a>
+</div>
+
+<div class="span4">
+	<h2>members:</h2>
+	<table class="table table-condensed">
+		{%for member in body.members.all %}
+		{% include "democracy/partials/member_td.html" %}
+		{% endfor %}
+	</table>
+
+
+
+<h2>candidates:</h2>
+<ol>
+	{% for c in body.candidate_set.all %}
+	<li>
+		{{ c.member.user.username }} <span class="badge badge-success pull-right">rating</span>
+	</li>
+	{% endfor %}
+</ol>
+{%if candidate%}
+<div class="alert alert-success">Great, you are already candidating!</div>
+{% else %}
+
+<a href="{% url 'candidate' body.org.id body.id %}" class="btn btn-primary">Candidate</a>
+
+<p>
+	You can become a member of this body by candidating.
+</p>
+{% endif %}
+<a href="{% url 'create_election' body.org.id body.id%}">MANUALLY CREATE ELECTION</a><BR>
+{% if body.election_set.all %}
+
+	<strong>There are some elections scheduled:</strong>
+<table class="table table-striped table-condensed">
+	{% for e in election %}
+	<tr>
+		<td>{{ e.question }}</td>
+		<td>{{ e.description }}</td>
+		<td><span class="badge badge-success">total votes {{e.vote_set.count}} </span></td>
+		<td><a href="{% url 'election_detail' body.org.id body.id e.id%}" class="btn btn-primary">Vote</a></td>
+		{% if e.in_progress %}
+		<td>
+			{% for c in body.candidate_set.all %}
+			<tr>{{ c.member.user.username }}</tr>
+
+			{% endfor %}
+		</td>
+		<script type="text/javascript">
+		  google.load("visualization", "1", {packages:["corechart"]});
+		  google.setOnLoadCallback(drawChart);
+		  function drawChart() {
+			var data = google.visualization.arrayToDataTable([
+			  ['Task', 'Hours per Day'],
+			  {% for c in e.choice_set.all %}
+			  ['{{ c.candidate.member.user.username }}', {{ c.vote_set.count }}],
+			  {% endfor %}
+			  ['Slug',    7]
+			]);
+
+			var options = {
+			  title: 'Election results'
+			};
+
+			var chart = new google.visualization.PieChart(document.getElementById('ele_chart_div'));
+			chart.draw(data, options);
+		  }
+		</script>
+		<div id="ele_chart_div"></div>
+		{% endif %}
+		
+	</tr>
+	<a href="{% url 'start_election' body.org.id body.id e.id%}">START ELECTIOIN</a>
+
+	{% endfor %}
+</table>
+
+
+{% else %}
+<div class="alert alert-info">No elections scheduled</div>
+{% endif %}
+</div>
+
+
+
+{% endblock %}

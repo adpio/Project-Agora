@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load avatar_tags %}
+{% block content %}
+{% include "democracy/partials/profile_nav.html" %}
+{{ user.first_name }}
+{{ user.last_name }}
+{{ user.username }}
+{% avatar user 200 %}
+{% include 'avatar/change.html' %}
+<h1>My Todos</h1>
+
+<table class="table">
+	<tr>
+		<th>org</th>
+		<th>body</th>
+		<th>title</th>
+		<th>description</th>
+		<th>priority</th>
+		<th>ready for review</th>
+		<th>review result</th>
+	</tr>
+{% for m in user.member_set.all %}
+
+	{% for b in m.body_set.all %}
+
+		{% for t in b.my_todos.all %}
+			<tr>
+			<td><strong>{{ m.org.name }}</strong></td>
+			<td>{{ b.name }}</td>
+			<td>{{ t.title }}</td>
+			<td>{{ t.content|truncatechars:150 }}</td>
+			<td> 			
+				<span class="label 
+				{% if t.priority == 1 %}
+				label-info
+				{% elif t.priority == 2 %}
+				label-warning	
+				{% elif t.priority == 3 %}
+				label-important
+				{% endif %}
+				">
+				{{ t.get_priority_display }}<br>
+				
+				<small>{{ t.date_due|timeuntil }}</small>
+				</span>
+			</td>
+			<td>{% if t.ready_for_review %}
+				<span class="label label-success">True</span>
+				{% else %}
+				<span class="label label-inverse">False</span>
+				{% endif %}
+
+			</td>
+			<td>
+
+				{% if t.review_result == None %}
+				<span class="label label-inverse">not yet</span>
+				{% elif t.review_result == True %}
+				<span class="label label-success">positively</span>
+				{% else %}
+				<span class="label label-danger">epic fail</span>
+				{% endif %}
+			</td>
+			</tr>
+		{% endfor %}
+	
+	{% endfor %}
+{% endfor %}
+</table>
+
+<h1>Todos to review</h1>
+<table class="table">
+	<tr>
+		<th>org</th>
+		<th>body</th>
+		<th>title</th>
+		<th>description</th>
+		<th>priority</th>
+		<th>ready for review</th>
+		<th>review result</th>
+	</tr>
+{% for m in user.member_set.all %}
+
+	{% for b in m.body_set.all %}
+
+		{% for t in b.todos_to_review.all %}
+			<tr>
+			<td><strong>{{ m.org.name }}</strong></td>
+			<td>{{ b.name }}</td>
+			<td>{{ t.title }}</td>
+			<td>{{ t.content|truncatechars:150 }}</td>
+			<td> 			
+				<span class="label 
+				{% if t.priority == 1 %}
+				label-info
+				{% elif t.priority == 2 %}
+				label-warning	
+				{% elif t.priority == 3 %}
+				label-important
+				{% endif %}
+				">
+				{{ t.get_priority_display }}<br>
+				
+				<small>{{ t.date_due|timeuntil }}</small>
+				</span>
+			</td>
+			<td>{% if t.ready_for_review %}
+				<span class="label label-success">True</span>
+				{% else %}
+				<span class="label label-inverse">False</span>
+				{% endif %}
+
+			</td>
+			<td>
+
+				{% if t.review_result == None %}
+				<span class="label label-inverse">not yet</span>
+				{% elif t.review_result == True %}
+				<span class="label label-success">positively</span>
+				{% else %}
+				<span class="label label-danger">epic fail</span>
+				{% endif %}
+			</td>
+			</tr>
+		{% endfor %}
+	
+	{% endfor %}
+{% endfor %}
+</table>
+
+
+{% endblock %}

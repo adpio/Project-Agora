@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table class="table table-condensed">
+	<tr>
+		<th>in progress?</th>
+		<th>result</th>
+		<th>date strated:</th>
+		<th>due by:</th>
+		<th>reviewing body:</th>
+	</tr>
+{% for review in todo.review_set.all %}
+	<tr>
+		<td>{% if review.in_progress %}<span class="badge badge-success">review in progress</span>{% else %}<span class="badge badge-info">review completed</span>{% endif %}</td>
+		<td>{% if review.result == True %}<span class="badge badge-success">successful</span>{% elif review.result == False %}<span class="badge badge-danger">failed</span>{% else %}<span class="badge badge-inverse">undecided</span>{% endif %}</td>
+		<td>{{ review.date_start }}</td>
+		<td>{{ review.date_finish }}</td>
+		<td>{{ review.voting_body }}</td>
+		
+		{% if not review.member_can_vote and not review.member_has_voted %}
+		
+		<td>
+		<form method="post">
+				{% csrf_token %}
+				<input type="hidden" name="review_id" value="{{ review.id }}">
+			{% for choice in review.choice_set.all %}
+			<label class="radio">
+			<input type="radio" name="choice" id="choice_{{ choice.id }}" value="{{ choice.id }}" unchecked>
+	  			{{ choice.choice }}
+			</label>
+			{% endfor %}
+			<button type="submit" class="btn">Review</button>
+		</form>
+	</td>
+		{% endif %}
+	</tr>
+{% endfor %}
+
+</table>
+{% endblock %}

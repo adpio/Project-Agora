@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if member_can_vote %}
+<form method="POST">
+	{% csrf_token %}
+  	<fieldset>
+    <legend>Ballot</legend>
+    <label>You are voting for candidates:</label>
+
+	{% for c in election.choice_set.all %}
+	<label class="radio">
+		<span class="help-block">*************Vote With Care*************</span>
+  	<input type="radio" name="choice" id="optionsRadios1" value="{{ c.id }}" checked>
+  {{ c.candidate.member.user.first_name }} <strong>{{ c.candidate.member.user.last_name }}</strong>({{ c.candidate.member.user.username }})
+	</label>
+	{% endfor %}
+    <button type="submit" class="btn">Vote</button>
+  </fieldset>
+</form>
+
+
+{% else %}
+Dude, you can't vote yo!
+{% endif %}
+
+
+{% endblock %}

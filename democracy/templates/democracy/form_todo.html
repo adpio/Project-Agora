@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block extra_head %}
+    {{ form.media }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Create a todo for body: {{ body.name }}</h1>
+    
+    
+    
+          
+    <form class="form-{{ layout }}" action="" method="post">
+        {% csrf_token %}
+
+                {{ form|as_bootstrap }}
+
+                
+                {% if layout == "horizontal" %}
+                    <p class="form-actions">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </p>
+                {% else %}
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                {% endif %}
+
+    </form>
+
+    <p>Submit the form to see error messages styled into it.</p>
+
+{% endblock %}

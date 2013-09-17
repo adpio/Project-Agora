@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+
+{% block extra_head %}
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+<script type='text/javascript'>
+  google.load('visualization', '1', {packages:['orgchart']});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Body Name');
+    data.addColumn('string', 'Reviewer');
+    data.addColumn('string', 'ToolTip');
+    data.addRows([
+    	{% for body in org.body_set.all %}
+      [{v:'{{ body.id }}', f:'{{ body.name }} <span class="badge badge-info">{{ body.members.count }}</span>'}, '{{ body.voting_body.id }}', '{{ body.name }}'],
+      {% endfor %}
+    ]);
+    var chart = new google.visualization.OrgChart(document.getElementById('org_div'));
+    chart.draw(data, {allowHtml:true, nodeClass:'org_node', selectedNodeClass:'org_node_selected'});
+  }</script>
+<script type='text/javascript'>
+  google.load('visualization', '1', {packages:['orgchart']});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Body Name');
+    data.addColumn('string', 'Reviewer');
+    data.addColumn('string', 'ToolTip');
+    data.addRows([
+    	{% for body in org.body_set.all %}
+      [{v:'{{ body.id }}', f:'{{ body.name }} <span class="badge badge-info">{{ body.members.count }}</span>'}, '{{ body.reviewer.id }}', '{{ body.name }}'],
+      {% endfor %}
+    ]);
+    var chart = new google.visualization.OrgChart(document.getElementById('org_div2'));
+    chart.draw(data, {allowHtml:true, nodeClass:'org_node2', selectedNodeClass:'org_node_selected'});
+  }</script>
+<style type="text/css">
+    .org_node {
+        background-color: silver;
+        color: white;
+
+        border: none;
+        cursor: pointer;
+    }
+    .org_node2 {
+        background-color: silver;
+        color: white;
+
+        border: none;
+        cursor: pointer;
+    }    
+    .org_node_selected{
+        background-color: black;
+        color: white;
+
+        border: none;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if member %}
+<div class="alert alert-info">
+	You are 
+	<span class="label 
+	{% if member.membership_type == 0 %} 
+	label-info
+	{% elif member.membership_type == 1 %}
+	label-success
+	{% elif member.membership_type == 2 %}
+	label-inverse
+	{% elif member.membership_type == 3 %}
+	label-important
+	{% endif %}
+	">
+	{{ member.get_membership_type_display }}
+</span>
+since
+{{ member.date_created }}
+</div>
+{% else %}
+<div class="alert alert-danger">
+	You are not associated with this organization yet!
+	<a href="{% url 'associate' org.id %}" class="btn btn-primary">Associate</a>
+</div>
+{% endif %}
+{% if member.membership_type == 0 %} 
+<div class="alert alert-info">Great, you are associated and your membership is under considaration by:
+<strong>
+admissions council
+</strong>
+</div>
+{% endif %}
+
+<div class="row">
+<div class="span8">
+<h1>{{ org.name }}</h1>
+<p>{{ org.description|linebreaks }}</p>
+</div>
+<div class="span4">
+<img src="{{ org.logo.url }}" class="img-polaroid">
+
+</div>
+</div>
+<div class="row">
+<div class="span5">
+<legend>Review structure</legend>
+<div id="org_div"></div>
+<legend>Voting structure</legend>
+<div id="org_div2"></div>
+</div>
+<div class="span7">
+<legend>bodies:</legend>
+
+<table class="table table-striped">
+	<tr>
+		<th>Body name</th>
+		<th>Members</th>
+		<th>Date created</th>
+		<th>Term left</th>
+		<th>Reviewer</th>
+
+	</tr>
+	{%for body in org.body_set.all %}
+	<tr>
+		<td>
+			<a href="{% url 'body_detail' org.id body.id %}">{{ body.name }}</a>
+		</td>
+		<td>
+			<span class="badge badge-info">{{ body.members.count }}</span>
+
+		</td>
+		<td>
+			{{ body.date_created }}
+		</td>
+		<td>
+			{%if body.is_perpetual %}
+			<span class="label">perpetual</span>
+			{% else %}
+			<span class="label label-success"><small>{{ body.date_finish|timeuntil }}</small></span>
+			{% endif %}
+		</td>
+		<td>
+			{% if body.reviewer.id %}
+			<a href="{% url 'body_detail' org.id body.reviewer.id %}">{{ body.reviewer.name}}</a>
+			{% else %}
+			This body has no reviewer!
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<a href="{% url 'form_body' org.id %}" class="btn btn-primary">Create body</a>
+</div>
+</div>
+<legend>members:</legend>
+
+{% for member in org.member_set.all %}
+{% include "democracy/partials/member_mediagrid.html" %}
+
+{% endfor %}
+{% endblock %}

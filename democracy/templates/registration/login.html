@@ -1,0 +1,44 @@
+{% load bootstrap_toolkit %}
+
+{% block content %}
+
+{% if form.errors %}
+<p class="error">Sorry, that's not a valid username or password</p>
+{% endif %}
+<div class="row">
+  <div class="span6">
+    <form method="post" action="{% url 'login_view' %}">
+      {% csrf_token %}
+
+      <label for="username">User name (your email):</label>
+      <input type="text" name="username" value="" id="username">
+      <label for="password">Password:</label>
+      <input type="password" name="password" value="" id="password">
+
+      <input type="submit" class="btn btn-primary" value="login" />
+      <input type="hidden" name="next" value="{{ next|escape }}" />
+      <input type="hidden" name="what_to_do" value="login" />
+    </form>
+  </div>
+  <div class="span6">
+    <form method="post" action="{% url 'login_view' %}">
+      {% csrf_token %}
+
+      <label for="username">User name (your email):</label>
+      <input type="text" name="username" value="" id="username">
+
+      <label for="password">Password:</label>
+      <input type="password" name="password1" value="" id="password1">
+
+      <label for="password2">Once again:</label>
+      <input type="password" name="password2" value="" id="password2">
+
+      <input type="submit" class="btn btn-primary" value="register" />
+
+      <input type="hidden" name="next" value="{{ next|escape }}" />
+
+      <input type="hidden" name="what_to_do" value="register" />
+    </form>
+  </div>
+  <div>
+    {% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block content %}
+
+    <h1>Create your organization</h1>
+    
+    <p>Please fill all information with care.</p>
+    
+    <p>&nbsp;</p>
+          
+    <form class="form-{{ layout }}" enctype="multipart/form-data" action="" method="post">
+        {% csrf_token %}
+
+                {{ form|as_bootstrap }}
+
+                {% if layout == "horizontal" %}
+                    <p class="form-actions">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </p>
+                {% else %}
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                {% endif %}
+
+    </form>
+
+    <p>Submit the form to see error messages styled into it.</p>
+
+{% endblock %}

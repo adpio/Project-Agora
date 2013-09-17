@@ -1,0 +1,26 @@
+<tr>
+<td><span class="label 
+	{% if member.membership_type == 0 %} 
+	label-info
+	{% elif member.membership_type == 1 %}
+	label-success
+	{% elif member.membership_type == 2 %}
+	label-inverse
+	{% elif member.membership_type == 3 %}
+	label-important
+	{% endif %}
+	">
+
+	{% if member.user.first_name == "" and member.user.last_name == "" %}
+	{{ member.user.username }}
+	{% else %}
+	{{ member.user.first_name }}
+	{% endif %}
+	{{ member.user.last_name }}
+	</span>
+</td>
+<td>
+	{{ member.get_membership_type_display }}
+
+</td>
+</tr>

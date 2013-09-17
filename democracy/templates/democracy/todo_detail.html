@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+
+{% block extra_head %}
+	<script type="text/javascript">
+	function memberize(member_id){
+		Dajaxice.democracy.assign_member(Dajax.process, {'m_id':member_id, 'todo_id':{{ todo.id }}});
+	}
+	function showmsg(msg){
+		var html = '<div class="alert fade in '+msg.atrib+'"><button type="button" class="close" data-dismiss="alert">&times;</button>'+ msg.message +'</div>'
+		$('.server_msg').append(html).show()
+	}
+	function task_flipper(){
+		Dajaxice.democracy.flip_task_completion(Dajax.process, {'todo_id':{{ todo.id }}} );
+		$('#review_ready').fadeOut();
+	}
+
+	</script>
+{% endblock %}
+
+{% block content %}
+
+
+{% if todo.ready_for_review %}
+	<div class="alert fade in alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Todo is ready to reviewed.
+	<a class="btn" href="{% url 'review_detail' org.id body.id todo.id %}">Review</a>
+	</div>
+{% endif %}
+<h1>{{ org.name }}</h1>
+<h2>{{ body.name }}</h2>
+
+
+<div class="row">
+	<div class="span6">
+		<legend>{{ todo.title }}</legend>
+		<p>
+			{{ todo.content|linebreaks }}
+		</p>
+	</div>
+
+	<div class="span2">
+		<span class="label 
+		{% if todo.priority == 1 %}
+		label-info
+		{% elif todo.priority == 2 %}
+		label-warning	
+		{% elif todo.priority == 3 %}
+		label-important
+		{% endif %}
+		">
+		{{ todo.get_priority_display }}
+	</span><br>
+		<div>
+	<i class="icon-time"></i>
+	{{ todo.date_due }}
+</div>
+	<div>
+	<span class="badge badge-info">{{ todo.get_recursivity_display }}</span>
+</div>
+	<div class="btn btn-inverse" id="review_ready" onclick="task_flipper();">
+
+	{% if todo.ready_for_review %}
+	<i class="icon-hand-up"></i> Unsubmit
+	{% else %}
+	<i class="icon-ok"></i> Submit for review
+	
+	{% endif %}
+	</div>
+	{% if todo.ready_for_review %}
+		<div id="review_state" class="btn btn-large">
+	{% else %}
+		<div id="review_state" class="btn btn-large" style="display:none;">
+	{% endif %}
+		{% if todo.review_result == None %}
+		<span class="badge badge-inverse">Not yet reviewed</span>
+		{% elif todo.review_result == True %}
+		<span class="badge badge-success">Reviewed positively</span>
+		{% else %}
+		<span class="badge badge-danger">Shmucks, you must do it again:(</span>
+		{% endif %}
+	</div>
+	
+</div>
+<div class="span4">
+
+{% for member in body.members.all %}
+{% if member in todo.assigned_members.all %}
+
+<div class="span1 label label-success" id="member_{{ member.id }}" style="cursor:pointer;margin-bottom:5px"  onclick="memberize({{ member.id }});">
+	{% if member.user.first_name == "" and member.user.last_name == "" %}
+	{{ member.user.username }}
+	{% else %}
+	{{ member.user.first_name }}
+	{% endif %}<br>
+	{{ member.user.last_name }}
+</div>
+{% else %}
+<div class="span1 label" id="member_{{ member.id }}" style="cursor:pointer;margin-bottom:5px;" onclick="memberize({{ member.id }});">
+	{% if member.user.first_name == "" and member.user.last_name == "" %}
+	{{ member.user.username }}
+	{% else %}
+	{{ member.user.first_name }}
+	{% endif %}<br>
+	<small>{{ member.user.last_name }}</small>
+</div>
+{% endif %}
+{% endfor %}
+
+
+</div>
+</div>
+
+
+
+<hr>
+<form action="{% url 'todo_detail' org.id body.id todo.id %}" method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	{% load bootstrap_toolkit %}
+	{{form|as_bootstrap}}
+
+	<p><input type="submit" class="btn" value="upload" /></p>
+</form>
+
+
+{% if documents %}
+<table class="table table-striped table condensed">
+	<tr>
+		<th>Added</th>
+		<th>Name</th>
+		<th>Ext</th>
+		<th>By</th>
+	</tr>	
+	{% for document in documents %}
+	<tr>
+		<td>{{ document.date_created}}</td>
+		<td><a href="{{ document.docfile.url }}">{{ document.name }}</a></td>
+		<td>{{document.file_ext}}</td>
+		<td>{{document.uploaded_by.user.username}}</td>
+
+	</tr>
+	{% endfor %}
+</table>
+{% else %}
+<p>No documents.</p>
+{% endif %}
+
+
+
+
+{% endblock %}
